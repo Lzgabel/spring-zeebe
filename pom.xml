@@ -240,4 +240,15 @@
     <developerConnection>scm:git:git@github.com:zeebe-io/spring-zeebe.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
+
+  <distributionManagement>
+    <repository>
+      <id>private-releases</id>
+      <url>http://116.62.222.54/repository/maven-releases</url>
+    </repository>
+    <snapshotRepository>
+      <id>private-snapshots</id>
+      <url>http://116.62.222.54/repository/maven-snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
 </project>
