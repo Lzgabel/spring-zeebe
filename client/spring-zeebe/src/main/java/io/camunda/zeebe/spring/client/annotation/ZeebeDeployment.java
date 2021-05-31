@@ -12,5 +12,7 @@ import java.lang.annotation.Target;
 @Documented
 @Inherited // has to be inherited to work on spring aop beans
 public @interface ZeebeDeployment {
-  String[] classPathResources();
+  String[] classPathResources() default {};
+
+  String[] bpmnLocations() default {"classpath*:/bpmn/**/*.bpmn"};
 }

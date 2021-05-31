@@ -8,15 +8,22 @@ public class ZeebeDeploymentValue implements ZeebeAnnotationValue<ClassInfo> {
 
   private List<String> classPathResources;
 
+  private List<String> bpmnLocations;
+
   private ClassInfo beanInfo;
 
-  private ZeebeDeploymentValue(List<String> classPathResources, ClassInfo beanInfo) {
+  private ZeebeDeploymentValue(List<String> classPathResources, ClassInfo beanInfo, List<String> bpmnLocations) {
     this.classPathResources = classPathResources;
     this.beanInfo = beanInfo;
+    this.bpmnLocations = bpmnLocations;
   }
 
   public List<String> getClassPathResources() {
     return classPathResources;
+  }
+
+  public List<String> getBpmnLocations() {
+    return bpmnLocations;
   }
 
   @Override
@@ -30,7 +37,8 @@ public class ZeebeDeploymentValue implements ZeebeAnnotationValue<ClassInfo> {
     if (o == null || getClass() != o.getClass()) return false;
     ZeebeDeploymentValue that = (ZeebeDeploymentValue) o;
     return Objects.equals(classPathResources, that.classPathResources) &&
-      Objects.equals(beanInfo, that.beanInfo);
+      Objects.equals(beanInfo, that.beanInfo) &&
+      Objects.equals(bpmnLocations, that.bpmnLocations);
   }
 
   @Override
@@ -43,6 +51,7 @@ public class ZeebeDeploymentValue implements ZeebeAnnotationValue<ClassInfo> {
     return "ZeebeDeploymentValue{" +
       "classPathResources=" + classPathResources +
       ", beanInfo=" + beanInfo +
+      ", bpmnLocations=" + bpmnLocations +
       '}';
   }
 
@@ -53,6 +62,7 @@ public class ZeebeDeploymentValue implements ZeebeAnnotationValue<ClassInfo> {
   public static final class ZeebeDeploymentValueBuilder {
 
     private List<String> classPathResources;
+    private List<String> bpmnLocations;
     private ClassInfo beanInfo;
 
     private ZeebeDeploymentValueBuilder() {
@@ -68,8 +78,13 @@ public class ZeebeDeploymentValue implements ZeebeAnnotationValue<ClassInfo> {
       return this;
     }
 
+    public ZeebeDeploymentValueBuilder bpmnLocations(List<String> bpmnLocations) {
+      this.bpmnLocations = bpmnLocations;
+      return this;
+    }
+
     public ZeebeDeploymentValue build() {
-      return new ZeebeDeploymentValue(classPathResources, beanInfo);
+      return new ZeebeDeploymentValue(classPathResources, beanInfo, bpmnLocations);
     }
   }
 }
