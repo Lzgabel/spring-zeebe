@@ -28,6 +28,9 @@ public class ReadZeebeDeploymentValue
             .classPathResources(
               resolveResources(annotation.classPathResources())
             )
+            .bpmnLocations(
+              resolveResources(annotation.bpmnLocations())
+            )
             .build());
   }
 
