@@ -6,6 +6,7 @@ import io.grpc.ClientInterceptor;
 import io.camunda.zeebe.client.CredentialsProvider;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -145,39 +146,23 @@ public class ZeebeClientConfigurationProperties implements ZeebeClientProperties
 
   public static class Broker {
 
-    private String gatewayAddress;
+    private List<GatewayProperties> gateways;
+
     private Duration keepAlive = DEFAULT.getKeepAlive();
 
-    /**
-     * Use gatewayAddress. It's deprecated since 0.25.0, and will be removed in 0.26.0
-     *
-     * @return gatewayAddress
-     */
-    @Deprecated
-    public String getContactPoint() {
-      return getGatewayAddress();
-    }
-
-    /**
-     * Use gatewayAddress. It's deprecated since 0.25.0, and will be removed in 0.26.0
-     *
-     * @param contactPoint
-     */
-    @Deprecated
-    public void setContactPoint(String contactPoint) {
-      setGatewayAddress(contactPoint);
-    }
-
-    public String getGatewayAddress() {
-      if (gatewayAddress != null) {
-        return gatewayAddress;
+    public List<GatewayProperties> getGateways() {
+      if (gateways != null) {
+        return gateways;
       } else {
-        return DEFAULT.getGatewayAddress();
+        GatewayProperties gatewayAddress = new GatewayProperties();
+        gatewayAddress.setAddress(DEFAULT.getGatewayAddress());
+        gatewayAddress.setName("master");
+        return Collections.singletonList(gatewayAddress);
       }
     }
 
-    public void setGatewayAddress(String gatewayAddress) {
-      this.gatewayAddress = gatewayAddress;
+    public void setGateways(List<GatewayProperties> gateways) {
+      this.gateways = gateways;
     }
 
     public Duration getKeepAlive() {
@@ -193,19 +178,19 @@ public class ZeebeClientConfigurationProperties implements ZeebeClientProperties
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       Broker broker = (Broker) o;
-      return Objects.equals(gatewayAddress, broker.gatewayAddress) &&
+      return Objects.equals(gateways, broker.gateways) &&
         Objects.equals(keepAlive, broker.keepAlive);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(gatewayAddress, keepAlive);
+      return Objects.hash(gateways, keepAlive);
     }
 
     @Override
     public String toString() {
       return "Broker{" +
-        "gatewayAddress='" + gatewayAddress + '\'' +
+        "gateways='" + gateways + '\'' +
         ", keepAlive=" + keepAlive +
         '}';
     }
@@ -475,10 +460,21 @@ public class ZeebeClientConfigurationProperties implements ZeebeClientProperties
 
   @Override
   public String getGatewayAddress() {
+    /**
+     * {@link #getGatewayAddresses}
+     */
+    return null;
+  }
+
+  @Override
+  public List<GatewayProperties> getGateways() {
     if (cloud.isConfigured()) {
-      return cloud.getGatewayAddress();
+      GatewayProperties gatewayAddress = new GatewayProperties();
+      gatewayAddress.setAddress(cloud.getGatewayAddress());
+      gatewayAddress.setName("master");
+      return Collections.singletonList(gatewayAddress);
     } else {
-      return broker.getGatewayAddress();
+      return broker.getGateways();
     }
   }
 

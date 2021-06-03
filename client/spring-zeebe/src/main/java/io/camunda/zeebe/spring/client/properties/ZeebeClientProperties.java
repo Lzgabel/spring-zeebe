@@ -33,6 +33,9 @@ public interface ZeebeClientProperties extends ZeebeClientConfiguration {
   @Deprecated
   JsonMapper getJsonMapper();
 
+
+  List<GatewayProperties> getGateways();
+
   default boolean isAutoStartup() {
     return true;
   }

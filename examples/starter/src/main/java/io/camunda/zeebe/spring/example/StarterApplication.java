@@ -4,6 +4,8 @@ import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
 import io.camunda.zeebe.spring.client.EnableZeebeClient;
 import io.camunda.zeebe.spring.client.ZeebeClientLifecycle;
 import io.camunda.zeebe.spring.client.annotation.ZeebeDeployment;
+
+import java.util.List;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,24 +26,26 @@ public class StarterApplication {
   }
 
   @Autowired
-  private ZeebeClientLifecycle client;
+  private List<ZeebeClientLifecycle> clients;
 
-  @Scheduled(fixedRate = 5000L)
+  @Scheduled(fixedRate = 100000L)
   public void startProcesses() {
-    if (!client.isRunning()) {
-      return;
-    }
+    clients.forEach(client -> {
+      if (!client.isRunning()) {
+        return;
+      }
 
-    final ProcessInstanceEvent event =
-      client
-        .newCreateInstanceCommand()
-        .bpmnProcessId("demoProcess")
-        .latestVersion()
-        .variables("{\"a\": \"" + UUID.randomUUID().toString() + "\"}")
-        .send()
-        .join();
+      final ProcessInstanceEvent event =
+        client
+          .newCreateInstanceCommand()
+          .bpmnProcessId("demoProcess")
+          .latestVersion()
+          .variables("{\"a\": \"" + UUID.randomUUID().toString() + "\"}")
+          .send()
+          .join();
 
-    log.info("started instance for workflowKey='{}', bpmnProcessId='{}', version='{}' with workflowInstanceKey='{}'",
-      event.getProcessDefinitionKey(), event.getBpmnProcessId(), event.getVersion(), event.getProcessInstanceKey());
+      log.info("started instance for workflowKey='{}', bpmnProcessId='{}', version='{}' with workflowInstanceKey='{}'",
+        event.getProcessDefinitionKey(), event.getBpmnProcessId(), event.getVersion(), event.getProcessInstanceKey());
+    });
   }
 }

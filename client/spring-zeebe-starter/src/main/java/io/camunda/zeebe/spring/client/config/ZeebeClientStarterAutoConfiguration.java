@@ -1,5 +1,6 @@
 package io.camunda.zeebe.spring.client.config;
 
+import com.google.common.collect.Lists;
 import io.grpc.ClientInterceptor;
 import io.camunda.zeebe.client.api.JsonMapper;
 import java.util.List;
@@ -27,34 +28,37 @@ public class ZeebeClientStarterAutoConfiguration {
 
   @Bean
   @Primary
-  public ZeebeClientBuilder builder(
+  public List<ZeebeClientBuilder> builder(
     @Autowired(required = false) JsonMapper jsonMapper,
     @Autowired(required = false) List<ClientInterceptor> clientInterceptorList
   ) {
-    final ZeebeClientBuilderImpl builder = new ZeebeClientBuilderImpl();
-
-    builder.gatewayAddress(configurationProperties.getGatewayAddress());
-    builder.defaultJobPollInterval(configurationProperties.getDefaultJobPollInterval());
-    builder.defaultJobTimeout(configurationProperties.getDefaultJobTimeout());
-    builder.defaultJobWorkerMaxJobsActive(configurationProperties.getDefaultJobWorkerMaxJobsActive());
-    builder.defaultJobWorkerName(configurationProperties.getDefaultJobWorkerName());
-    builder.defaultMessageTimeToLive(configurationProperties.getDefaultMessageTimeToLive());
-    builder.numJobWorkerExecutionThreads(configurationProperties.getNumJobWorkerExecutionThreads());
-    builder.defaultRequestTimeout(configurationProperties.getDefaultRequestTimeout());
-    builder.credentialsProvider(configurationProperties.getCredentialsProvider());
-    builder.caCertificatePath(configurationProperties.getCaCertificatePath());
-    if (configurationProperties.isPlaintextConnectionEnabled()) {
-      builder.usePlaintext();
-    }
-    if (jsonMapper != null) {
-      builder.withJsonMapper(jsonMapper);
-    }
-    final List<ClientInterceptor> legacyInterceptors = configurationProperties.getInterceptors();
-    if (!legacyInterceptors.isEmpty()) {
-      builder.withInterceptors(legacyInterceptors.toArray(new ClientInterceptor[0]));
-    } else if (clientInterceptorList != null && !clientInterceptorList.isEmpty()) {
-      builder.withInterceptors(clientInterceptorList.toArray(new ClientInterceptor[0]));
-    }
-    return builder;
+    List<ZeebeClientBuilder> builders = Lists.newArrayList();
+    configurationProperties.getGateways().forEach(gateway -> {
+      final ZeebeClientBuilderImpl builder = new ZeebeClientBuilderImpl();
+      builder.gatewayAddress(gateway.getAddress());
+      builder.defaultJobPollInterval(configurationProperties.getDefaultJobPollInterval());
+      builder.defaultJobTimeout(configurationProperties.getDefaultJobTimeout());
+      builder.defaultJobWorkerMaxJobsActive(configurationProperties.getDefaultJobWorkerMaxJobsActive());
+      builder.defaultJobWorkerName(configurationProperties.getDefaultJobWorkerName());
+      builder.defaultMessageTimeToLive(configurationProperties.getDefaultMessageTimeToLive());
+      builder.numJobWorkerExecutionThreads(configurationProperties.getNumJobWorkerExecutionThreads());
+      builder.defaultRequestTimeout(configurationProperties.getDefaultRequestTimeout());
+      builder.credentialsProvider(configurationProperties.getCredentialsProvider());
+      builder.caCertificatePath(configurationProperties.getCaCertificatePath());
+      if (configurationProperties.isPlaintextConnectionEnabled()) {
+        builder.usePlaintext();
+      }
+      if (jsonMapper != null) {
+        builder.withJsonMapper(jsonMapper);
+      }
+      final List<ClientInterceptor> legacyInterceptors = configurationProperties.getInterceptors();
+      if (!legacyInterceptors.isEmpty()) {
+        builder.withInterceptors(legacyInterceptors.toArray(new ClientInterceptor[0]));
+      } else if (clientInterceptorList != null && !clientInterceptorList.isEmpty()) {
+        builder.withInterceptors(clientInterceptorList.toArray(new ClientInterceptor[0]));
+      }
+      builders.add(builder);
+    });
+    return builders;
   }
 }

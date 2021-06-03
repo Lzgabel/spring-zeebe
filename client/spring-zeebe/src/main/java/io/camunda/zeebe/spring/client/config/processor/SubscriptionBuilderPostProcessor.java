@@ -18,11 +18,11 @@ public class SubscriptionBuilderPostProcessor implements BeanPostProcessor, Orde
     LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final List<BeanInfoPostProcessor> processors;
-  private final ZeebeClientLifecycle clientLifecycle;
+  private final List<ZeebeClientLifecycle> clientLifecycles;
 
-  public SubscriptionBuilderPostProcessor(List<BeanInfoPostProcessor> processors, ZeebeClientLifecycle clientLifecycle) {
+  public SubscriptionBuilderPostProcessor(List<BeanInfoPostProcessor> processors, List<ZeebeClientLifecycle> clientLifecycles) {
     this.processors = processors;
-    this.clientLifecycle = clientLifecycle;
+    this.clientLifecycles = clientLifecycles;
   }
 
   @Override
@@ -42,7 +42,7 @@ public class SubscriptionBuilderPostProcessor implements BeanPostProcessor, Orde
       }
 
       final Consumer<ZeebeClient> c = p.apply(beanInfo);
-      clientLifecycle.addStartListener(c);
+      clientLifecycles.forEach(clientLifecycle -> clientLifecycle.addStartListener(c));
     }
 
     return bean;

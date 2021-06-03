@@ -1,18 +1,25 @@
 package io.camunda.zeebe.spring.client.config;
 
+import com.google.common.collect.Lists;
+import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.ZeebeClientBuilder;
 import io.camunda.zeebe.client.impl.ZeebeClientBuilderImpl;
-import io.camunda.zeebe.client.impl.ZeebeClientImpl;
 import io.camunda.zeebe.spring.client.ZeebeClientLifecycle;
 import io.camunda.zeebe.spring.client.ZeebeClientObjectFactory;
 import io.camunda.zeebe.spring.client.bean.value.factory.ReadAnnotationValueConfiguration;
 import io.camunda.zeebe.spring.client.config.processor.PostProcessorConfiguration;
-import java.util.Properties;
-
+import io.camunda.zeebe.spring.client.properties.GatewayProperties;
+import io.camunda.zeebe.spring.client.properties.ZeebeClientProperties;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.stream.Collectors;
 
 @Import({
   PostProcessorConfiguration.class,
@@ -22,20 +29,38 @@ import org.springframework.context.annotation.Import;
 public class ZeebeClientSpringConfiguration {
 
   @Autowired
-  ZeebeClientBuilder zeebeClientBuilder;
+  List<ZeebeClientBuilder> zeebeClientBuilders;
+
+  @Autowired
+  ZeebeClientProperties zeebeClientProperties;
+
+  @Autowired
+  DefaultListableBeanFactory beanFactory;
 
   public static final ZeebeClientBuilderImpl DEFAULT =
     (ZeebeClientBuilderImpl) new ZeebeClientBuilderImpl().withProperties(new Properties());
 
   @Bean
-  public ZeebeClientLifecycle zeebeClientLifecycle(
-    final ZeebeClientObjectFactory factory,
+  public List<ZeebeClientLifecycle> zeebeClientLifecycles(
+    final List<ZeebeClientObjectFactory> factories,
     final ApplicationEventPublisher publisher) {
-    return new ZeebeClientLifecycle(factory, publisher);
+    List<GatewayProperties> gateways = zeebeClientProperties.getGateways();
+    Map<String, String> addressMap = gateways.stream().collect(Collectors.toMap(GatewayProperties::getAddress, GatewayProperties::getName, (v1, v2)->v2));
+    return factories.stream().map(factory -> {
+      ZeebeClient zeebeClient = factory.getObject();
+      final String gatewayAddress = zeebeClient.getConfiguration().getGatewayAddress();
+      final String name = addressMap.get(gatewayAddress);
+      ZeebeClientLifecycle zeebeClientLifecycle = new ZeebeClientLifecycle(factory, publisher);
+      beanFactory.registerSingleton(name + "ZeebeClientLifecycle", zeebeClientLifecycle);
+      beanFactory.registerSingleton(name + "ZeebeClient", zeebeClient);
+      return zeebeClientLifecycle;
+    }).collect(Collectors.toList());
   }
 
   @Bean
-  public ZeebeClientObjectFactory zeebeClientObjectFactory() {
-    return () -> zeebeClientBuilder.build();
+  public List<ZeebeClientObjectFactory> zeebeClientObjectFactory() {
+    List<ZeebeClientObjectFactory> factories = Lists.newArrayList();
+    zeebeClientBuilders.forEach(zeebeClientBuilder -> factories.add(() -> zeebeClientBuilder.build()));
+    return factories;
   }
 }

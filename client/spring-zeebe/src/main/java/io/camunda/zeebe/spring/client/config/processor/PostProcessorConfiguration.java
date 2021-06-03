@@ -13,8 +13,8 @@ public class PostProcessorConfiguration {
 
   @Bean
   public SubscriptionBuilderPostProcessor subscriptionBuilderPostProcessor(
-    final List<BeanInfoPostProcessor> processors, final ZeebeClientLifecycle clientLifecycle) {
-    return new SubscriptionBuilderPostProcessor(processors, clientLifecycle);
+    final List<BeanInfoPostProcessor> processors, final List<ZeebeClientLifecycle> clientLifecycles) {
+    return new SubscriptionBuilderPostProcessor(processors, clientLifecycles);
   }
 
   @Bean
