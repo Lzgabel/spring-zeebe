@@ -2,6 +2,7 @@ package io.camunda.zeebe.spring.client.config;
 
 import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.spring.client.actuator.ZeebeClientHealthIndicator;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -16,7 +17,7 @@ public class ZeebeActuatorConfiguration {
 
   @Bean
   @ConditionalOnMissingBean(name = "zeebeClientHealthIndicator")
-  public ZeebeClientHealthIndicator zeebeClientHealthIndicator(ZeebeClient client) {
+  public ZeebeClientHealthIndicator zeebeClientHealthIndicator(@Qualifier("masterZeebeClient") ZeebeClient client) {
     return new ZeebeClientHealthIndicator(client);
   }
 

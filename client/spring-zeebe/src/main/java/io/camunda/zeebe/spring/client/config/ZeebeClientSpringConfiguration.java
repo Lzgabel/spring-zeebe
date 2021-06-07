@@ -15,6 +15,8 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -45,7 +47,15 @@ public class ZeebeClientSpringConfiguration {
     final List<ZeebeClientObjectFactory> factories,
     final ApplicationEventPublisher publisher) {
     List<GatewayProperties> gateways = zeebeClientProperties.getGateways();
+    if (CollectionUtils.isEmpty(gateways)) {
+      if (StringUtils.isEmpty(zeebeClientProperties.getGatewayAddress())) {
+        throw new RuntimeException("The 'single gatewayAddress' or 'multiple gateways' can't be empty");
+      }
+    }
     Map<String, String> addressMap = gateways.stream().collect(Collectors.toMap(GatewayProperties::getAddress, GatewayProperties::getName, (v1, v2)->v2));
+    if (!addressMap.containsKey("master")) {
+      throw new RuntimeException("The 'multiple gateways' must contain 'master' name");
+    }
     return factories.stream().map(factory -> {
       ZeebeClient zeebeClient = factory.getObject();
       final String gatewayAddress = zeebeClient.getConfiguration().getGatewayAddress();
