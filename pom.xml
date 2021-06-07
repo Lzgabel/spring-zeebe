@@ -12,7 +12,7 @@
   <groupId>io.camunda</groupId>
   <artifactId>spring-zeebe-root</artifactId>
   <name>pom/spring-zeebe</name>
-  <version>1.1.0-SNAPSHOT</version>
+  <version>xhzy-1.0.1</version>
   <packaging>pom</packaging>
 
   <properties>
@@ -23,7 +23,7 @@
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
 
-    <zeebe.version>1.0.0-rc2</zeebe.version>
+    <zeebe.version>xhzy-1.0.0</zeebe.version>
     <spring-boot.version>2.2.11.RELEASE</spring-boot.version>
 
     <!-- release parent settings for distribution management -->
@@ -331,4 +331,15 @@
     <developerConnection>scm:git:git@github.com:zeebe-io/spring-zeebe.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
+
+  <distributionManagement>
+    <repository>
+      <id>private-releases</id>
+      <url>http://116.62.222.54/repository/maven-releases</url>
+    </repository>
+    <snapshotRepository>
+      <id>private-snapshots</id>
+      <url>http://116.62.222.54/repository/maven-snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
 </project>

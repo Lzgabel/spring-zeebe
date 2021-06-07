@@ -22,6 +22,10 @@ public class ZeebeDeploymentValue implements ZeebeAnnotationValue<ClassInfo> {
     return classPathResources;
   }
 
+  public List<String> getBpmnLocations() {
+    return bpmnLocations;
+  }
+
   @Override
   public ClassInfo getBeanInfo() {
     return beanInfo;

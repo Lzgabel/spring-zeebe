@@ -1,5 +1,6 @@
 package io.camunda.zeebe.spring.client.config.processor;
 
+import com.google.common.collect.Lists;
 import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.api.command.DeployProcessCommandStep1;
 import io.camunda.zeebe.client.api.response.DeploymentEvent;
@@ -10,11 +11,11 @@ import io.camunda.zeebe.spring.client.bean.value.factory.ReadZeebeDeploymentValu
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,12 +27,12 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 
 public class DeploymentPostProcessor extends BeanInfoPostProcessor {
 
+  private static final ResourcePatternResolver resourceResolver = new PathMatchingResourcePatternResolver();
+
   private static final Logger LOGGER =
     LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final ReadZeebeDeploymentValue reader;
-
-  private static final ResourcePatternResolver resourceResolver = new PathMatchingResourcePatternResolver();
 
   public DeploymentPostProcessor(ReadZeebeDeploymentValue reader) {
     this.reader = reader;
@@ -49,16 +50,15 @@ public class DeploymentPostProcessor extends BeanInfoPostProcessor {
     LOGGER.info("deployment: {}", value);
 
     return client -> {
-
-      DeployProcessCommandStep1 deployWorkflowCommand = client
-        .newDeployCommand();
-
-      List<Resource> locations = Stream.of(Optional.ofNullable(value.getBpmnLocations()).orElse(Collections.emptyList()))
+      List<Resource> resources = Stream.of(Optional.ofNullable(value.getBpmnLocations()).orElse(Lists.newArrayList()))
         .flatMap(List::stream)
         .flatMap(location -> Stream.of(getResources(location)))
         .collect(Collectors.toList());
 
-      Stream<DeployProcessCommandStep1.DeployProcessCommandBuilderStep2> deployProcessCommandBuilderStep2StreamOfLocations = locations.stream().map(resource -> {
+      DeployProcessCommandStep1 deployWorkflowCommand = client
+        .newDeployCommand();
+
+      Stream<DeployProcessCommandStep1.DeployProcessCommandBuilderStep2> deployProcessCommandBuilderStep2StreamOfLocations = resources.stream().map(resource -> {
         try {
           return deployWorkflowCommand.addResourceStream(resource.getInputStream(), resource.getFilename());
         } catch (IOException e) {
@@ -70,7 +70,7 @@ public class DeploymentPostProcessor extends BeanInfoPostProcessor {
         .stream()
         .map(deployWorkflowCommand::addResourceFromClasspath);
 
-      DeploymentEvent deploymentResult =  Stream.of(deployProcessCommandBuilderStep2StreamOfLocations, deployProcessCommandBuilderStep2StreamOfResources)
+      DeploymentEvent deploymentResult = Stream.of(deployProcessCommandBuilderStep2StreamOfLocations, deployProcessCommandBuilderStep2StreamOfResources)
         .flatMap(u -> u)
         .reduce((first, second) -> second)
         .orElseThrow(() -> new IllegalArgumentException("Requires at least one resource to deploy"))
