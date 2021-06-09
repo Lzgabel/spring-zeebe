@@ -53,7 +53,7 @@ public class ZeebeClientSpringConfiguration {
       }
     }
     Map<String, String> addressMap = gateways.stream().collect(Collectors.toMap(GatewayProperties::getAddress, GatewayProperties::getName, (v1, v2)->v2));
-    if (!addressMap.containsKey("master")) {
+    if (!addressMap.containsValue("master")) {
       throw new RuntimeException("The 'multiple gateways' must contain 'master' name");
     }
     return factories.stream().map(factory -> {
