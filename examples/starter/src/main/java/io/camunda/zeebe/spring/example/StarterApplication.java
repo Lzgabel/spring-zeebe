@@ -15,7 +15,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 @SpringBootApplication
 @EnableZeebeClient
 @EnableScheduling
-@ZeebeDeployment(classPathResources = "demoProcess.bpmn", bpmnLocations = "classpath*:/bpmn/**/*.bpmn")
+@ZeebeDeployment(classPathResources = "demoProcess.bpmn")
 @Slf4j
 public class StarterApplication {
 
