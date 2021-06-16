@@ -309,6 +309,7 @@ public class ZeebeClientConfigurationProperties implements ZeebeClientProperties
     private Integer threads = DEFAULT.getNumJobWorkerExecutionThreads();
     private String defaultName = null; // setting NO default in Spring, as bean/method name is used as default
     private String defaultType = null;
+    private String namespace = null;
     private Map<String, ZeebeWorkerValue> override = new HashMap<>();
 
     public Map<String, ZeebeWorkerValue> getOverride() {
@@ -345,6 +346,14 @@ public class ZeebeClientConfigurationProperties implements ZeebeClientProperties
 
     public String getDefaultType() {
       return defaultType;
+    }
+
+    public void setNamespace(String namespace) {
+      this.namespace = namespace;
+    }
+
+    public String getNamespace() {
+      return namespace;
     }
 
     public void setDefaultType(String defaultType) {
@@ -534,6 +543,11 @@ public class ZeebeClientConfigurationProperties implements ZeebeClientProperties
   @Override
   public String getDefaultJobWorkerName() {
     return worker.getDefaultName();
+  }
+
+  @Override
+  public String getNamespace() {
+    return worker.getNamespace();
   }
 
   public String getDefaultJobWorkerType() {

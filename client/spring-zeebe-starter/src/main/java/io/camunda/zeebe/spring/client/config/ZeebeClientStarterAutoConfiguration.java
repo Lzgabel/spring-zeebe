@@ -40,6 +40,7 @@ public class ZeebeClientStarterAutoConfiguration {
     builder.defaultJobTimeout(configurationProperties.getDefaultJobTimeout());
     builder.defaultJobWorkerMaxJobsActive(configurationProperties.getDefaultJobWorkerMaxJobsActive());
     builder.defaultJobWorkerName(configurationProperties.getDefaultJobWorkerName());
+    builder.namespace(configurationProperties.getNamespace());
     builder.defaultMessageTimeToLive(configurationProperties.getDefaultMessageTimeToLive());
     builder.numJobWorkerExecutionThreads(configurationProperties.getNumJobWorkerExecutionThreads());
     builder.defaultRequestTimeout(configurationProperties.getDefaultRequestTimeout());
