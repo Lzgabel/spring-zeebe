@@ -304,6 +304,7 @@ public class ZeebeClientConfigurationProperties implements ZeebeClientProperties
     private Integer threads = DEFAULT.getNumJobWorkerExecutionThreads();
     private String defaultName = DEFAULT.getDefaultJobWorkerName();
     private String defaultType = null;
+    private String namespace = null;
 
     public Integer getMaxJobsActive() {
       return maxJobsActive;
@@ -331,6 +332,14 @@ public class ZeebeClientConfigurationProperties implements ZeebeClientProperties
 
     public String getDefaultType() {
       return defaultType;
+    }
+
+    public void setNamespace(String namespace) {
+      this.namespace = namespace;
+    }
+
+    public String getNamespace() {
+      return namespace;
     }
 
     public void setDefaultType(String defaultType) {
@@ -509,6 +518,11 @@ public class ZeebeClientConfigurationProperties implements ZeebeClientProperties
   @Override
   public String getDefaultJobWorkerName() {
     return worker.getDefaultName();
+  }
+
+  @Override
+  public String getNamespace() {
+    return worker.getNamespace();
   }
 
   public String getDefaultJobWorkerType() {
