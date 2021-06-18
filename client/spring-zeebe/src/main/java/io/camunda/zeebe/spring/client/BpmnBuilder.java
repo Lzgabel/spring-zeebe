@@ -10,9 +10,11 @@ import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
 import io.camunda.zeebe.model.bpmn.builder.ProcessBuilder;
 import io.camunda.zeebe.model.bpmn.builder.*;
 import io.camunda.zeebe.model.bpmn.instance.*;
+import io.process.analytics.tools.bpmn.generator.BpmnAutoLayout;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
+import java.io.ByteArrayInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -44,7 +46,12 @@ public class BpmnBuilder {
             moveToNode(startEventBuilder, lastNode).endEvent();
           BpmnModelInstance modelInstance = startEventBuilder.done();
           Bpmn.validateModel(modelInstance);
-          return modelInstance;
+          // 自动布局
+          return Bpmn.readModelFromStream(
+            new ByteArrayInputStream(
+              BpmnAutoLayout.layout(Bpmn.convertToString(modelInstance), BpmnAutoLayout.ExportType.BPMN).getBytes()
+            )
+          );
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("创建失败: e=" + e.getMessage());
