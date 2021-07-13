@@ -215,7 +215,6 @@ public class ZeebeClientConfigurationProperties implements ZeebeClientProperties
     private String clusterId;
     private String clientId;
     private String clientSecret;
-    private String region = "bru-2";
 
     private String baseUrl = "zeebe.camunda.io";
     private String authUrl = "https://login.cloud.camunda.io/oauth/token";
@@ -244,14 +243,6 @@ public class ZeebeClientConfigurationProperties implements ZeebeClientProperties
 
     public void setClientSecret(String clientSecret) {
       this.clientSecret = clientSecret;
-    }
-
-    public String getRegion() {
-      return region;
-    }
-
-    public void setRegion(final String region) {
-      this.region = region;
     }
 
     public String getBaseUrl() {
@@ -287,7 +278,7 @@ public class ZeebeClientConfigurationProperties implements ZeebeClientProperties
     }
 
     public String getAudience() {
-      return String.format("%s.%s.%s", clusterId, region, baseUrl);
+      return clusterId + "." + baseUrl;
     }
 
     public boolean isConfigured() {
@@ -295,7 +286,7 @@ public class ZeebeClientConfigurationProperties implements ZeebeClientProperties
     }
 
     public String getGatewayAddress() {
-      return String.format("%s.%s.%s:%d", clusterId, region, baseUrl, port);
+      return clusterId + "." + baseUrl + ":" + port;
     }
   }
 
