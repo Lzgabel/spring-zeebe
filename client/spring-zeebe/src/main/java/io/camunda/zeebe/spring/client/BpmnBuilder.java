@@ -152,8 +152,8 @@ public class BpmnBuilder {
       }
       // 只生成一个任务，同时设置当前任务的条件
       childNode.put("incoming", Collections.singletonList(exclusiveGatewayBuilder.getElement().getId()));
-      String identifier = createTask(exclusiveGatewayBuilder, childNode);
-      exclusiveGatewayBuilder.moveToNode(identifier).getElement().getIncoming().stream().forEach(
+      String identifier = create(exclusiveGatewayBuilder, exclusiveGatewayBuilder.getElement().getId(), childNode);
+      exclusiveGatewayBuilder.getElement().getOutgoing().stream().forEach(
         e -> {
           if (StringUtils.isBlank(e.getName()) && StringUtils.isNotBlank(nodeName)) {
             e.setName(nodeName);
@@ -172,17 +172,6 @@ public class BpmnBuilder {
           }
         }
       );
-
-      // 当前任务设置条件后，如果还有后续任务，则遍历后续创建后续任务
-      if (childNode.containsKey("nextNode")) {
-        childNode = childNode.getJSONObject("nextNode");
-        if (Objects.nonNull(childNode)) {
-          childNode.put("incoming", Collections.singletonList(identifier));
-          // 递归创建后续任务， 返回的是最后一个任务id
-          identifier = create(moveToNode(exclusiveGatewayBuilder, identifier), identifier, childNode);
-        }
-      }
-
       if (Objects.nonNull(identifier)) {
         incoming.add(identifier);
       }
