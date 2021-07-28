@@ -13,7 +13,6 @@ import io.camunda.zeebe.model.bpmn.builder.*;
 import io.camunda.zeebe.model.bpmn.instance.*;
 import io.camunda.zeebe.model.bpmn.instance.zeebe.ZeebeCalledElement;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.CollectionUtils;
 
 import java.io.ByteArrayInputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -142,6 +141,7 @@ public class BpmnBuilder {
       String nodeName = element.getString("nodeName");
       String expression = element.getString("conditionExpression");
 
+      // 记录分支条件中不存在任务节点的情况（即空分支）
       if (Objects.isNull(childNode)) {
         incoming.add(exclusiveGatewayBuilder.getElement().getId());
         JSONObject condition = new JSONObject();
@@ -194,11 +194,11 @@ public class BpmnBuilder {
           moveToNode(exclusiveGatewayBuilder, incoming.get(i)).connectTo(identifier);
         }
 
-        //  针对 gateway 空任务分支 添加条件表达式
+        //  针对分支条件中空分支场景 添加条件表达式
         if (!conditions.isEmpty()) {
           List<SequenceFlow> sequenceFlows = moveToNode(exclusiveGatewayBuilder, identifier)
             .getElement().getIncoming().stream()
-            // 获取从 gateway 到目标节点 未设置条件表达式的节点
+            // 获取从源 gateway 到目标节点 未设置条件表达式的节点
             .filter(e -> StringUtils.equals(e.getSource().getId(), exclusiveGatewayBuilder.getElement().getId()))
             .collect(Collectors.toList());
 
@@ -266,7 +266,7 @@ public class BpmnBuilder {
     JSONObject childNode = flowNode.getJSONObject("nextNode");
     if (Objects.nonNull(childNode)) {
       // 普通结束网关
-      if (CollectionUtils.isEmpty(incoming)) {
+      if (incoming == null || incoming.size() == 0) {
         return create(parallelGatewayBuilder, parallelGatewayBuilder.getElement().getId(), childNode);
       } else {
         // 所有 service task 连接 end parallel gateway
@@ -375,12 +375,12 @@ public class BpmnBuilder {
     /**
      * 子任务类型
      */
-    SUB_PROCESS("subProcess",SubProcess .class),
+    SUB_PROCESS("subProcess", SubProcess.class),
 
     /**
      * 调用任务类型
      */
-    CALL_ACTIVITY("callActivity",CallActivity .class);
+    CALL_ACTIVITY("callActivity", CallActivity.class);
 
     private String type;
 
