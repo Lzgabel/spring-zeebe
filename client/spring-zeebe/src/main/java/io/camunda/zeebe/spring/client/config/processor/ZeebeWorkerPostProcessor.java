@@ -13,9 +13,11 @@ import java.lang.invoke.MethodHandles;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -55,7 +57,11 @@ public class ZeebeWorkerPostProcessor extends BeanInfoPostProcessor {
           final JobWorkerBuilderStep3 builder = client
             .newWorker()
             .jobType(m.getType())
-            .handler((jobClient, job) -> m.getBeanInfo().invoke(jobClient, job));
+            .handler((jobClient, job) -> {
+              MDC.put("traceId", String.valueOf(job.getProcessInstanceKey()));
+              MDC.put("spanId", UUID.randomUUID().toString().replace("-", ""));
+              m.getBeanInfo().invoke(jobClient, job);
+            });
 
           // using defaults from config if null, 0 or negative
           if (m.getName() != null && m.getName().length() > 0) {
