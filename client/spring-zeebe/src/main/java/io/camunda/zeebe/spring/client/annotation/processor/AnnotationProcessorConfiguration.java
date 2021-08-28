@@ -20,11 +20,6 @@ public class AnnotationProcessorConfiguration {
   }
 
   @Bean
-  public OutboundConnectorAnnotationProcessor outboundConnectorAnnotationProcessor(final JobWorkerManager jobWorkerManager) {
-    return new OutboundConnectorAnnotationProcessor(jobWorkerManager);
-  }
-
-  @Bean
   public ZeebeWorkerAnnotationProcessor zeebeWorkerPostProcessor(final JobWorkerManager jobWorkerManager,
                                                                  final List<ZeebeWorkerValueCustomizer> zeebeWorkerValueCustomizers,
                                                                  final Environment environment) { // can#t use @Value because it is only evaluated after constructors are executed

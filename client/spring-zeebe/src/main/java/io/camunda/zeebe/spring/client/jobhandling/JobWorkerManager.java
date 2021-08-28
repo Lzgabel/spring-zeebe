@@ -1,8 +1,5 @@
 package io.camunda.zeebe.spring.client.jobhandling;
 
-import io.camunda.connector.api.outbound.OutboundConnectorFunction;
-import io.camunda.connector.api.secret.SecretProvider;
-import io.camunda.connector.api.secret.SecretStore;
 import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.api.JsonMapper;
 import io.camunda.zeebe.client.api.worker.JobHandler;
@@ -23,17 +20,13 @@ public class JobWorkerManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final DefaultCommandExceptionHandlingStrategy commandExceptionHandlingStrategy;
-  private final SecretStore secretStore;
-
   private List<JobWorker> openedWorkers = new ArrayList<>();
   private List<ZeebeWorkerValue> workerValues = new ArrayList<>();
   private JsonMapper jsonMapper;
 
   public JobWorkerManager(DefaultCommandExceptionHandlingStrategy commandExceptionHandlingStrategy,
-                          SecretStore secretStore,
                           JsonMapper jsonMapper) {
     this.commandExceptionHandlingStrategy = commandExceptionHandlingStrategy;
-    this.secretStore = secretStore;
     this.jsonMapper = jsonMapper;
   }
 
@@ -42,13 +35,6 @@ public class JobWorkerManager {
       client,
       zeebeWorkerValue,
       new JobHandlerInvokingSpringBeans(zeebeWorkerValue, commandExceptionHandlingStrategy, jsonMapper));
-  }
-
-  public JobWorker openWorker(ZeebeClient client, ZeebeWorkerValue zeebeWorkerValue, OutboundConnectorFunction function) {
-    return openWorker(
-      client,
-      zeebeWorkerValue,
-      new JobHandlerInvokingSpringBeans(zeebeWorkerValue, commandExceptionHandlingStrategy, secretStore, function, jsonMapper));
   }
 
   public JobWorker openWorker(ZeebeClient client, ZeebeWorkerValue zeebeWorkerValue, JobHandler handler) {

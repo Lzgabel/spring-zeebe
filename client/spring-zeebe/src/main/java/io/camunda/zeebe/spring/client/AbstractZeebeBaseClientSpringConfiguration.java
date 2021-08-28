@@ -1,17 +1,14 @@
 package io.camunda.zeebe.spring.client;
 
-import io.camunda.connector.api.secret.SecretStore;
 import io.camunda.zeebe.client.api.JsonMapper;
 import io.camunda.zeebe.client.api.worker.BackoffSupplier;
 import io.camunda.zeebe.client.impl.worker.ExponentialBackoffBuilderImpl;
 import io.camunda.zeebe.spring.client.annotation.processor.AnnotationProcessorConfiguration;
 import io.camunda.zeebe.spring.client.jobhandling.DefaultCommandExceptionHandlingStrategy;
 import io.camunda.zeebe.spring.client.jobhandling.JobWorkerManager;
-import io.camunda.zeebe.spring.client.jobhandling.SpringSecretProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.env.Environment;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -32,16 +29,9 @@ public abstract class AbstractZeebeBaseClientSpringConfiguration {
   }
 
   @Bean
-  public SecretStore secretStore(Environment env) {
-    return new SecretStore(
-      new SpringSecretProvider(env));
-  }
-
-  @Bean
   public JobWorkerManager jobWorkerManager(final DefaultCommandExceptionHandlingStrategy commandExceptionHandlingStrategy,
-                                           SecretStore secretStore,
                                            @Autowired(required = false) JsonMapper jsonMapper) {
-    return new JobWorkerManager(commandExceptionHandlingStrategy, secretStore, jsonMapper);
+    return new JobWorkerManager(commandExceptionHandlingStrategy, jsonMapper);
   }
 
   @Bean
