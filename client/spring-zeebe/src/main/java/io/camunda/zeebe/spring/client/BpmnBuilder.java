@@ -49,6 +49,10 @@ public class BpmnBuilder {
 
       StartEventBuilder startEventBuilder = executableProcess.startEvent();
       JSONObject flowNode = object.getJSONObject("processNode");
+      if (Type.START_EVENT.isEqual(flowNode.getString("nodeType"))) {
+        createStartEvent(startEventBuilder, flowNode);
+        flowNode = flowNode.getJSONObject("nextNode");
+      }
       String lastNode = create(startEventBuilder, startEventBuilder.getElement().getId(), flowNode);
 
       moveToNode(startEventBuilder, lastNode).endEvent();
@@ -138,6 +142,32 @@ public class BpmnBuilder {
       return id;
     } else {
       throw new RuntimeException("未知节点类型: nodeType=" + nodeType);
+    }
+  }
+
+  private static void createStartEvent(StartEventBuilder startEventBuilder, JSONObject flowNode) throws InvocationTargetException, IllegalAccessException {
+    // 事件类型 timer/message 默认：none
+    String eventType = flowNode.getString("eventType");
+    String nodeName = flowNode.getString("nodeName");
+    if (StringUtils.isNotBlank(eventType)) {
+      startEventBuilder.name(nodeName);
+      if (StartEventType.TIMER.isEqual(eventType)) {
+        // timer 定义类型： date/cycle/duration
+        String timerDefinitionType = flowNode.getString("timerDefinitionType");
+        if (TimerDefinitionType.DATE.isEqual(timerDefinitionType)) {
+          String timerDefinition = flowNode.getString("timerDefinition");
+          startEventBuilder.timerWithDate(timerDefinition);
+        } else if (TimerDefinitionType.DURATION.isEqual(timerDefinitionType)) {
+          String timerDefinition = flowNode.getString("timerDefinition");
+          startEventBuilder.timerWithDuration(timerDefinition);
+        } else if (TimerDefinitionType.CYCLE.isEqual(timerDefinitionType)) {
+          String timerDefinition = flowNode.getString("timerDefinition");
+          startEventBuilder.timerWithCycle(timerDefinition);
+        }
+      } else if (StartEventType.MESSAGE.isEqual(eventType)) {
+        String messageName = flowNode.getString("messageName");
+        startEventBuilder.message(messageName);
+      }
     }
   }
 
@@ -467,6 +497,11 @@ public class BpmnBuilder {
   private enum Type {
 
     /**
+     *  开始事件
+     */
+    START_EVENT("startEvent", StartEvent.class),
+
+    /**
      * 并行事件
      */
     PARALLEL_GATEWAY("parallelGateway", ParallelGateway.class),
@@ -532,5 +567,57 @@ public class BpmnBuilder {
     public boolean isEqual(String typeName) {
       return this.typeName.equals(typeName);
     }
+  }
+
+  private enum TimerDefinitionType {
+
+    /**
+     * date
+     */
+    DATE("date"),
+
+    /**
+     * cycle
+     */
+    CYCLE("cycle"),
+
+    /**
+     * duration
+     */
+    DURATION("duration");
+
+    private String value;
+
+
+    TimerDefinitionType(String value) {
+      this.value = value;
+    }
+    public boolean isEqual(String value) {
+      return this.value.equals(value);
+    }
+  }
+
+  private enum StartEventType {
+
+    /**
+     * timer event
+     */
+    TIMER("timer"),
+
+    /**
+     * message event
+     */
+    MESSAGE("message");
+
+    private String value;
+
+    StartEventType(String value) {
+      this.value = value;
+    }
+
+    public boolean isEqual(String value) {
+      return this.value.equals(value);
+    }
+
   }
 }
