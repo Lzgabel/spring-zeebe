@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 /**
  * 〈功能简述〉<br>
  * 〈基于 json 格式自动生成 bpmn 文件〉
- *  https://xhzy.yuque.com/magic-iumn2/qzice2/nefe1h
+ * https://xhzy.yuque.com/magic-iumn2/qzice2/nefe1h
  *
  * @author lizhi
  * @date 2021-06-15
@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 
 public class BpmnBuilder {
 
-  public static final String EXPRESSION_PREFIX = "=";
+  private static final String ZEEBE_EXPRESSION_PREFIX = "=";
 
   public static BpmnModelInstance build(String json) {
     return build(json, true);
@@ -140,6 +140,8 @@ public class BpmnBuilder {
         return create(abstractFlowNodeBuilder, id, childNode);
       }
       return id;
+    } else if (Type.INTERMEDIATE_CATCH_EVENT.isEqual(nodeType)) {
+      return createIntermediateCatchEvent(startFlowNodeBuilder, flowNode);
     } else {
       throw new RuntimeException("未知节点类型: nodeType=" + nodeType);
     }
@@ -151,7 +153,7 @@ public class BpmnBuilder {
     String nodeName = flowNode.getString("nodeName");
     if (StringUtils.isNotBlank(eventType)) {
       startEventBuilder.name(nodeName);
-      if (StartEventType.TIMER.isEqual(eventType)) {
+      if (EventType.TIMER.isEqual(eventType)) {
         // timer 定义类型： date/cycle/duration
         String timerDefinitionType = flowNode.getString("timerDefinitionType");
         if (TimerDefinitionType.DATE.isEqual(timerDefinitionType)) {
@@ -164,7 +166,7 @@ public class BpmnBuilder {
           String timerDefinition = flowNode.getString("timerDefinition");
           startEventBuilder.timerWithCycle(timerDefinition);
         }
-      } else if (StartEventType.MESSAGE.isEqual(eventType)) {
+      } else if (EventType.MESSAGE.isEqual(eventType)) {
         String messageName = flowNode.getString("messageName");
         startEventBuilder.message(messageName);
       }
@@ -335,6 +337,39 @@ public class BpmnBuilder {
     return parallelGatewayBuilder.getElement().getId();
   }
 
+  private static String createIntermediateCatchEvent(AbstractFlowNodeBuilder abstractFlowNodeBuilder, JSONObject flowNode) {
+    String nodeName = flowNode.getString("nodeName");
+    String eventType = flowNode.getString("eventType");
+    if (EventType.TIMER.isEqual(eventType)) {
+      String timerDefinition = flowNode.getString("timerDefinition");
+      return abstractFlowNodeBuilder.intermediateCatchEvent()
+        .timerWithDuration(timerDefinition).getElement().getId();
+    } else if (EventType.MESSAGE.isEqual(eventType)) {
+      String messageName = flowNode.getString("messageName");
+      String messageCorrelationKey = flowNode.getString("correlationKey");
+      if (StringUtils.isBlank(messageName) || StringUtils.isBlank(messageCorrelationKey)) {
+        throw new RuntimeException("messageName/correlationKey 不能为空");
+      }
+      return abstractFlowNodeBuilder.intermediateCatchEvent().name(nodeName)
+        .message(messageBuilder -> {
+          if (StringUtils.isNotBlank(messageName)) {
+            messageBuilder.name(messageName);
+          }
+          if (StringUtils.isNotBlank(messageCorrelationKey)) {
+            // The correlationKey is an expression that usually accesses a variable of the process instance
+            // that holds the correlation key of the message
+            // 默认如果没有 '=' 则自动拼上
+            if (StringUtils.startsWith(messageCorrelationKey, ZEEBE_EXPRESSION_PREFIX)) {
+              messageBuilder.zeebeCorrelationKey(messageCorrelationKey);
+            } else {
+              messageBuilder.zeebeCorrelationKeyExpression(messageCorrelationKey);
+            }
+          }
+        }).getElement().getId();
+    }
+    return null;
+  }
+
   private static String createJobWorkerTask(AbstractFlowNodeBuilder startFlowNodeBuilder, JSONObject flowNode) throws InvocationTargetException, IllegalAccessException {
     Map<String, AbstractFlowNodeBuilder> map = Maps.newHashMap();
     String nodeType = flowNode.getString("nodeType");
@@ -401,7 +436,7 @@ public class BpmnBuilder {
             // The correlationKey is an expression that usually accesses a variable of the process instance
             // that holds the correlation key of the message
             // 默认如果没有 '=' 则自动拼上
-            if (StringUtils.startsWith(messageCorrelationKey, EXPRESSION_PREFIX)) {
+            if (StringUtils.startsWith(messageCorrelationKey, ZEEBE_EXPRESSION_PREFIX)) {
               messageBuilder.zeebeCorrelationKey(messageCorrelationKey);
             } else {
               messageBuilder.zeebeCorrelationKeyExpression(messageCorrelationKey);
@@ -453,11 +488,11 @@ public class BpmnBuilder {
 
     // set job type
     if (StringUtils.isNotBlank(jobType)) {
-        jobWorkerTaskBuilder.zeebeJobType(jobType);
+      jobWorkerTaskBuilder.zeebeJobType(jobType);
     }
     // set job retries
     if (StringUtils.isNotBlank(jobRetries)) {
-        jobWorkerTaskBuilder.zeebeJobRetries(jobRetries);
+      jobWorkerTaskBuilder.zeebeJobRetries(jobRetries);
     }
 
     // set task header
@@ -497,7 +532,7 @@ public class BpmnBuilder {
   private enum Type {
 
     /**
-     *  开始事件
+     * 开始事件
      */
     START_EVENT("startEvent", StartEvent.class),
 
@@ -544,7 +579,12 @@ public class BpmnBuilder {
     /**
      * 调用任务类型
      */
-    CALL_ACTIVITY("callActivity", CallActivity.class);
+    CALL_ACTIVITY("callActivity", CallActivity.class),
+
+    /**
+     * 中级捕获事件
+     */
+    INTERMEDIATE_CATCH_EVENT("intermediateCatchEvent", IntermediateCatchEvent.class);
 
     private String typeName;
 
@@ -592,12 +632,13 @@ public class BpmnBuilder {
     TimerDefinitionType(String value) {
       this.value = value;
     }
+
     public boolean isEqual(String value) {
       return this.value.equals(value);
     }
   }
 
-  private enum StartEventType {
+  private enum EventType {
 
     /**
      * timer event
@@ -611,7 +652,7 @@ public class BpmnBuilder {
 
     private String value;
 
-    StartEventType(String value) {
+    EventType(String value) {
       this.value = value;
     }
 
