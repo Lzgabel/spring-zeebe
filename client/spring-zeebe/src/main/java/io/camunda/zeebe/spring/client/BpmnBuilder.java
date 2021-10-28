@@ -131,6 +131,8 @@ public class BpmnBuilder {
       callActivityBuilder.getElement().setName(flowNode.getString("nodeName"));
       callActivityBuilder.addExtensionElement(ZeebeCalledElement.class, (ZeebeCalledElement zeebeCalledElement) -> {
         zeebeCalledElement.setProcessId(flowNode.getString("processId"));
+        Boolean propagateAllChildVariablesEnabled = Optional.ofNullable(flowNode.getBoolean("propagateAllChildVariablesEnabled")).orElse(false);
+        zeebeCalledElement.setPropagateAllChildVariablesEnabled(propagateAllChildVariablesEnabled);
         callActivityBuilder.addExtensionElement(zeebeCalledElement);
       });
       String id = callActivityBuilder.getElement().getId();
