@@ -5,13 +5,11 @@ import io.camunda.zeebe.client.api.command.FinalCommandStep;
 import io.camunda.zeebe.client.api.response.ActivatedJob;
 import io.camunda.zeebe.client.api.worker.JobClient;
 import io.camunda.zeebe.client.api.worker.JobHandler;
-import io.camunda.zeebe.client.impl.Loggers;
 import io.camunda.zeebe.spring.client.annotation.ZeebeVariable;
 import io.camunda.zeebe.spring.client.bean.ParameterInfo;
 import io.camunda.zeebe.spring.client.bean.value.ZeebeWorkerValue;
 import io.camunda.zeebe.spring.client.exception.DefaultCommandExceptionHandlingStrategy;
 import io.camunda.zeebe.spring.client.exception.ZeebeBpmnError;
-import org.slf4j.Logger;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -20,7 +18,6 @@ import java.util.Map;
 
 public class ZeebeWorkerSpringJobHandler implements JobHandler {
 
-  private static final Logger LOG = Loggers.JOB_WORKER_LOGGER;
   private ZeebeWorkerValue workerValue;
   private DefaultCommandExceptionHandlingStrategy commandExceptionHandlingStrategy;
 
@@ -46,8 +43,7 @@ public class ZeebeWorkerSpringJobHandler implements JobHandler {
           return null;
         });
       }
-    }
-    catch (ZeebeBpmnError bpmnError) {
+    } catch (ZeebeBpmnError bpmnError) {
       handleBpmnError(jobClient, job, bpmnError);
     }
   }
@@ -55,7 +51,8 @@ public class ZeebeWorkerSpringJobHandler implements JobHandler {
   private List<Object> createParameters(JobClient jobClient, ActivatedJob job, List<ParameterInfo> parameters) {
     List<Object> args = new ArrayList<>();
     for (ParameterInfo param : parameters) {
-      Object arg = null; // parameter default null
+      // parameter default null
+      Object arg = null;
       Class<?> clazz = param.getParameterInfo().getType();
 
       if (JobClient.class.isAssignableFrom(clazz)) {
@@ -81,9 +78,9 @@ public class ZeebeWorkerSpringJobHandler implements JobHandler {
       if (result.getClass().isAssignableFrom(Map.class)) {
         completeCommand = completeCommand.variables((Map) result);
       } else if (result.getClass().isAssignableFrom(String.class)) {
-        completeCommand = completeCommand.variables((String)result);
+        completeCommand = completeCommand.variables((String) result);
       } else if (result.getClass().isAssignableFrom(InputStream.class)) {
-        completeCommand = completeCommand.variables((InputStream)result);
+        completeCommand = completeCommand.variables((InputStream) result);
       } else {
         completeCommand = completeCommand.variables(result);
       }
@@ -91,7 +88,7 @@ public class ZeebeWorkerSpringJobHandler implements JobHandler {
     return completeCommand;
   }
 
-  public void handleBpmnError(JobClient jobClient, ActivatedJob job,  ZeebeBpmnError bpmnError) {
+  public void handleBpmnError(JobClient jobClient, ActivatedJob job, ZeebeBpmnError bpmnError) {
     FinalCommandStep<Void> command = jobClient.newThrowErrorCommand(job.getKey()) // TODO: PR for taking a job only in command chain
       .errorCode(bpmnError.getErrorCode())
       .errorMessage(bpmnError.getErrorMessage());

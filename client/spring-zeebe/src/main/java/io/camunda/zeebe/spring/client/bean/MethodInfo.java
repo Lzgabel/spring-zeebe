@@ -1,5 +1,7 @@
 package io.camunda.zeebe.spring.client.bean;
 
+import io.camunda.zeebe.spring.client.annotation.ZeebeVariable;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 
 import static org.springframework.core.annotation.AnnotationUtils.findAnnotation;
@@ -44,8 +46,7 @@ public class MethodInfo implements BeanInfo {
       final Throwable targetException = e.getTargetException();
       if (targetException instanceof RuntimeException) {
         throw (RuntimeException) targetException;
-      }
-      else {
+      } else {
         throw new RuntimeException("Failed to invoke method: " + method.getName(), targetException);
       }
     } catch (IllegalAccessException e) {

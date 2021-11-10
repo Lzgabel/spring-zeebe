@@ -7,7 +7,6 @@ import java.lang.reflect.Method;
 import java.util.Optional;
 
 public class ClassInfo implements BeanInfo {
-
   private Object bean;
   private String beanName;
 

@@ -6,6 +6,7 @@ import io.camunda.zeebe.client.api.command.*;
 import io.camunda.zeebe.client.api.command.CancelProcessInstanceCommandStep1;
 import io.camunda.zeebe.client.api.command.CreateProcessInstanceCommandStep1;
 import io.camunda.zeebe.client.api.command.DeployProcessCommandStep1;
+import io.camunda.zeebe.client.api.response.ActivatedJob;
 import io.camunda.zeebe.client.api.worker.JobWorkerBuilderStep1;
 import io.camunda.zeebe.client.impl.ZeebeClientImpl;
 import io.camunda.zeebe.spring.client.event.ClientStartedEvent;
@@ -95,6 +96,12 @@ public class ZeebeClientLifecycle extends ZeebeAutoStartUpLifecycle<ZeebeClient>
   }
 
   @Override
+  public UpdateRetriesJobCommandStep1 newUpdateRetriesCommand(ActivatedJob job) {
+    return newUpdateRetriesCommand(job.getKey());
+  }
+
+
+  @Override
   public JobWorkerBuilderStep1 newWorker() {
     return get().newWorker();
   }
@@ -110,12 +117,27 @@ public class ZeebeClientLifecycle extends ZeebeAutoStartUpLifecycle<ZeebeClient>
   }
 
   @Override
+  public CompleteJobCommandStep1 newCompleteCommand(ActivatedJob job) {
+    return newCompleteCommand(job.getKey());
+  }
+
+  @Override
   public FailJobCommandStep1 newFailCommand(long jobKey) {
     return get().newFailCommand(jobKey);
   }
 
   @Override
+  public FailJobCommandStep1 newFailCommand(ActivatedJob job) {
+    return newFailCommand(job.getKey());
+  }
+
+  @Override
   public ThrowErrorCommandStep1 newThrowErrorCommand(long jobKey) {
     return get().newThrowErrorCommand(jobKey);
+  }
+
+  @Override
+  public ThrowErrorCommandStep1 newThrowErrorCommand(ActivatedJob job) {
+    return newThrowErrorCommand(job.getKey());
   }
 }
