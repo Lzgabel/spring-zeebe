@@ -63,7 +63,8 @@ public class JobHandlerInvokingSpringBeans implements JobHandler {
   private List<Object> createParameters(JobClient jobClient, ActivatedJob job, List<ParameterInfo> parameters) {
     List<Object> args = new ArrayList<>();
     for (ParameterInfo param : parameters) {
-      Object arg = null; // parameter default null
+      // parameter default null
+      Object arg = null;
       Class<?> clazz = param.getParameterInfo().getType();
 
       if (JobClient.class.isAssignableFrom(clazz)) {
@@ -102,9 +103,9 @@ public class JobHandlerInvokingSpringBeans implements JobHandler {
       if (result.getClass().isAssignableFrom(Map.class)) {
         completeCommand = completeCommand.variables((Map) result);
       } else if (result.getClass().isAssignableFrom(String.class)) {
-        completeCommand = completeCommand.variables((String)result);
+        completeCommand = completeCommand.variables((String) result);
       } else if (result.getClass().isAssignableFrom(InputStream.class)) {
-        completeCommand = completeCommand.variables((InputStream)result);
+        completeCommand = completeCommand.variables((InputStream) result);
       } else {
         completeCommand = completeCommand.variables(result);
       }

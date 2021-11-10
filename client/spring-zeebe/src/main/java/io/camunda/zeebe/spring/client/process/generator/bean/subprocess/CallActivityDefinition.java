@@ -1,0 +1,36 @@
+package io.camunda.zeebe.spring.client.process.generator.bean.subprocess;
+
+import io.camunda.zeebe.spring.client.process.generator.bean.BaseDefinition;
+import lombok.Data;
+import lombok.NonNull;
+import lombok.experimental.SuperBuilder;
+
+/**
+ * 〈功能简述〉<br>
+ * 〈调用活动定义〉
+ *
+ * @author lizhi
+ * @date 2021/11/10
+ * @since 1.0.0
+ */
+
+@Data
+@SuperBuilder
+public class CallActivityDefinition extends BaseDefinition {
+
+  /**
+   * 子流程 id
+   */
+  @NonNull
+  private String processId;
+
+  /**
+   * 子流程变量是否向上传播
+   */
+  private boolean propagateAllChildVariablesEnabled;
+
+  @Override
+  public String getNodeType() {
+    return "callActivity";
+  }
+}
