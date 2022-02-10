@@ -10,7 +10,7 @@
   <groupId>io.camunda</groupId>
   <artifactId>spring-zeebe-root</artifactId>
   <name>pom/spring-zeebe</name>
-  <version>1.2.6-SNAPSHOT</version>
+  <version>1.3.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <properties>
@@ -21,8 +21,8 @@
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
 
-    <zeebe.version>1.2.4</zeebe.version>
-    <spring-boot.version>2.3.12.RELEASE</spring-boot.version>
+    <zeebe.version>1.3.3</zeebe.version>
+    <spring-boot.version>2.6.3</spring-boot.version>
 
     <plugin.version.javadoc>3.1.1</plugin.version.javadoc>
     <!-- disable jdk8 javadoc checks on release build -->
@@ -57,6 +57,11 @@
         <version>${zeebe.version}</version>
         <scope>import</scope>
         <type>pom</type>
+      </dependency>
+      <dependency>
+        <groupId>io.camunda</groupId>
+        <artifactId>zeebe-process-test</artifactId>
+        <version>${zeebe.version}</version>
       </dependency>
 
       <!-- CLIENT -->
@@ -108,7 +113,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.8.1</version>
+          <version>3.9.0</version>
           <!-- available from Java 9, but we went back to jdk8 for building
           <configuration>
             <release>${java.version}</release>

@@ -1,9 +1,7 @@
 package io.camunda.zeebe.spring.client.bean.value.factory;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import io.camunda.zeebe.spring.client.bean.ClassInfo;
 import io.camunda.zeebe.spring.client.bean.ClassInfoTest;
@@ -12,10 +10,9 @@ import io.camunda.zeebe.spring.client.bean.value.ZeebeWorkerValue;
 import io.camunda.zeebe.spring.util.ZeebeExpressionResolver;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Optional;
-import org.junit.Test;
-import org.mockito.internal.util.collections.Sets;
+
+import org.junit.jupiter.api.Test;
 
 public class ReadZeebeWorkerValueTest {
 
@@ -39,7 +36,7 @@ public class ReadZeebeWorkerValueTest {
     assertEquals(-1, zeebeWorkerValue.get().getPollInterval());
     assertEquals(false, zeebeWorkerValue.get().isAutoComplete());
     assertArrayEquals(new String[] {}, zeebeWorkerValue.get().getFetchVariables());
-    assertEquals(methodInfo, zeebeWorkerValue.get().getBeanInfo());
+    assertEquals(methodInfo, zeebeWorkerValue.get().getMethodInfo());
   }
 
   @Test
@@ -62,7 +59,7 @@ public class ReadZeebeWorkerValueTest {
     assertEquals(1_000L, zeebeWorkerValue.get().getPollInterval());
     assertEquals(true, zeebeWorkerValue.get().isAutoComplete());
     assertArrayEquals(new String[] { "foo"}, zeebeWorkerValue.get().getFetchVariables());
-    assertEquals(methodInfo, zeebeWorkerValue.get().getBeanInfo());
+    assertEquals(methodInfo, zeebeWorkerValue.get().getMethodInfo());
   }
 
   @Test
@@ -78,7 +75,7 @@ public class ReadZeebeWorkerValueTest {
     //then
     assertTrue(zeebeWorkerValue.isPresent());
     assertThat(Arrays.asList("var1", "var2", "var3" )).hasSameElementsAs(Arrays.asList(zeebeWorkerValue.get().getFetchVariables()));
-    assertEquals(methodInfo, zeebeWorkerValue.get().getBeanInfo());
+    assertEquals(methodInfo, zeebeWorkerValue.get().getMethodInfo());
   }
 
   private MethodInfo extract(Class<?> clazz) throws NoSuchMethodException {

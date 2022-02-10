@@ -19,7 +19,7 @@ Just add the following Maven dependency to your Spring Boot Starter project:
 <dependency>
 	<groupId>io.camunda</groupId>
 	<artifactId>spring-zeebe-starter</artifactId>
-	<version>1.2.1</version>
+	<version>1.3.0</version>
 </dependency>
 ```
 
@@ -53,7 +53,7 @@ Use the `@ZeebeDeployment` annotation:
 public class MySpringBootApplication {
 ```
 
-This annotation uses (which internally uses [https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#resources-resourceloader](the Spring resource loader) mechanism which is pretty powerful and can for example also deploy multiple files at once:
+This annotation uses (which internally uses [https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#resources-resourceloader] (the Spring resource loader) mechanism which is pretty powerful and can for example also deploy multiple files at once:
 
 ```
 @ZeebeDeployment(resources = {"classpath:demoProcess.bpmn" , "classpath:demoProcess2.bpmn"})
@@ -174,6 +174,19 @@ public Map<String, Object> handleJobFoo(final ActivatedJob job) {
 }
 ```
 
+When using `autoComplete` you can also use your own class variables are mapped to (comparable to `getVariablesAsType()` in the API). Therefore use the `@ZeebeVariablesAsType` annotation:
+
+```java
+@ZeebeWorker(type = "foo", autoComplete = true)
+public ProcessVariables handleFoo(@ZeebeVariablesAsType ProcessVariables variables){
+  // do whatever you need to do
+  variables.getMyAttribueX();
+  variables.setMyAttribueY(42);
+  // return variables object if something has changed, so the changes are submitted to Zeebe
+  return variables;
+}
+```
+
 
 ### Throwing ZeebeBpmnError's
 
@@ -197,18 +210,18 @@ public void handleJobFoo() {
 Connections to the Camunda Cloud can be easily configured:
 
 ```
-zeebe.client.cloud.clusterId=xxx
-zeebe.client.cloud.clientId=xxx
-zeebe.client.cloud.clientSecret=xxx
+zeebe.client.cloud.cluster-id=xxx
+zeebe.client.cloud.client-id=xxx
+zeebe.client.cloud.client-secret=xxx
 zeebe.client.cloud.region=bru-2
 ```
 
 If you don't connect to the Camunda Cloud production environment you might have to also adjust these two properties:
 
 ```
-zeebe.client.cloud.baseUrl=zeebe.camunda.io
+zeebe.client.cloud.base-url=zeebe.camunda.io
 zeebe.client.cloud.port=443
-zeebe.client.cloud.authUrl=https://login.cloud.camunda.io/oauth/token
+zeebe.client.cloud.auth-url=https://login.cloud.camunda.io/oauth/token
 ```
 
 As an alternative you can use the [Zeebe Client environment variables](https://docs.camunda.io/docs/components/clients/java-client/index/#bootstrapping). 
@@ -216,7 +229,7 @@ As an alternative you can use the [Zeebe Client environment variables](https://d
 ## Configuring Self-managed Zeebe Connection
 
 ```
-zeebe.client.broker.gatewayAddress=127.0.0.1:26500
+zeebe.client.broker.gateway-address=127.0.0.1:26500
 zeebe.client.security.plaintext=true
 ```
 
@@ -231,7 +244,7 @@ zeebe.client.worker.defaultType=foo
 Number of jobs that are polled from the broker to be worked on in this client and thread pool size to handle the jobs:
 
 ```
-zeebe.client.worker.maxJobsActive=32
+zeebe.client.worker.max-jobs-active=32
 zeebe.client.worker.threads=1
 ```
 
