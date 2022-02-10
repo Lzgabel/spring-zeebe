@@ -1,7 +1,5 @@
 package io.camunda.zeebe.spring.client.config;
 
-import io.camunda.zeebe.spring.client.config.processor.CommandHandlingStrategy;
-import io.camunda.zeebe.spring.client.config.processor.DefaultCommandHandlingStrategy;
 import io.grpc.ClientInterceptor;
 import io.camunda.zeebe.client.api.JsonMapper;
 import java.util.List;
@@ -62,9 +60,4 @@ public class ZeebeClientStarterAutoConfiguration {
     return builder;
   }
 
-  @Bean
-  @ConditionalOnMissingBean(CommandHandlingStrategy.class)
-  public CommandHandlingStrategy commandHandlingStrategy() {
-    return new DefaultCommandHandlingStrategy();
-  }
 }
