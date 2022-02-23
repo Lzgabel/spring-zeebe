@@ -6,18 +6,21 @@ import io.camunda.zeebe.client.api.response.ActivatedJob;
 import io.camunda.zeebe.client.api.worker.JobClient;
 import io.camunda.zeebe.client.api.worker.JobHandler;
 import io.camunda.zeebe.client.impl.Loggers;
+import io.camunda.zeebe.client.impl.ZeebeObjectMapper;
 import io.camunda.zeebe.spring.client.annotation.ZeebeCustomHeaders;
 import io.camunda.zeebe.spring.client.annotation.ZeebeVariable;
 import io.camunda.zeebe.spring.client.annotation.ZeebeVariablesAsType;
 import io.camunda.zeebe.spring.client.bean.ParameterInfo;
 import io.camunda.zeebe.spring.client.bean.value.ZeebeWorkerValue;
 import io.camunda.zeebe.spring.client.exception.ZeebeBpmnError;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Zeebe JobHandler that invokes a Spring bean
@@ -25,6 +28,7 @@ import java.util.Map;
 public class JobHandlerInvokingSpringBeans implements JobHandler {
 
   private static final Logger LOG = Loggers.JOB_WORKER_LOGGER;
+  private static final ZeebeObjectMapper OBJECT_MAPPER = new ZeebeObjectMapper();
   private ZeebeWorkerValue workerValue;
   private DefaultCommandExceptionHandlingStrategy commandExceptionHandlingStrategy;
 
@@ -74,7 +78,12 @@ public class JobHandlerInvokingSpringBeans implements JobHandler {
       } else if (param.getParameterInfo().isAnnotationPresent(ZeebeVariable.class)) {
         try {
           // TODO make this work for complex types as well
-          arg = clazz.cast(job.getVariablesAsMap().get(param.getParameterName()));
+          ZeebeVariable zeebeVariable = param.getParameterInfo().getAnnotation(ZeebeVariable.class);
+          String parameterName = StringUtils.isNotBlank(zeebeVariable.value()) ? zeebeVariable.value() : param.getParameterName();
+          Object value = job.getVariablesAsMap().get(parameterName);
+          if (Objects.nonNull(value)) {
+            arg = OBJECT_MAPPER.fromJson(OBJECT_MAPPER.toJson(value), param.getParameterInfo().getParameterizedType());
+          }
         }
         catch (ClassCastException ex) {
           throw new RuntimeException("Cannot assign process variable '" + param.getParameterName() + "' to parameter, invalid type found: " + ex.getMessage());
