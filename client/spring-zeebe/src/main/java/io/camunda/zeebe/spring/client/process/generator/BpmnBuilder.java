@@ -65,14 +65,6 @@ public class BpmnBuilder {
         .filter(StringUtils::isNotBlank)
         .ifPresent(executableProcess::id);
 
-      Optional.ofNullable(process.getString("candidateStarterGroups"))
-        .filter(StringUtils::isNotBlank)
-        .ifPresent(executableProcess::candidateStarterGroups);
-
-      Optional.ofNullable(process.getString("candidateStarterUsers"))
-        .filter(StringUtils::isNotBlank)
-        .ifPresent(executableProcess::candidateStarterUsers);
-
       StartEventBuilder startEventBuilder = executableProcess.startEvent();
       JSONObject flowNode = object.getJSONObject("processNode");
       if (NodeType.START_EVENT.isEqual(flowNode.getString("nodeType"))) {

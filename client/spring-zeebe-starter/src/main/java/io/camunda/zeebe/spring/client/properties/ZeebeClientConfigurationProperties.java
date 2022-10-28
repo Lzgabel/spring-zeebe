@@ -101,6 +101,11 @@ public class ZeebeClientConfigurationProperties implements ZeebeClientProperties
     this.interceptors = interceptors;
   }
 
+  @Override
+  public String getOverrideAuthority() {
+    return null;
+  }
+
   public Duration getRequestTimeout() {
     return requestTimeout;
   }

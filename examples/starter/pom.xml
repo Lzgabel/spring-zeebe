@@ -4,7 +4,7 @@
   <parent>
     <groupId>io.camunda</groupId>
     <artifactId>spring-zeebe-example-root</artifactId>
-    <version>xhzy-1.3.0-SNAPSHOT</version>
+    <version>xhzy-8.0-SNAPSHOT</version>
   </parent>
 
   <groupId>io.camunda</groupId>
