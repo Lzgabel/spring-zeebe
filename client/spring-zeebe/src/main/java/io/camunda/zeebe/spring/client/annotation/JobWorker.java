@@ -33,7 +33,7 @@ public @interface JobWorker {
    *  You can still throw exceptions if you want to raise a problem instead of job completion.
    *  You could also raise a BPMN problem throwing a {@link io.camunda.zeebe.spring.client.exception.ZeebeBpmnError}
    */
-  boolean autoComplete() default true;
+  boolean autoComplete() default false;
 
   boolean enabled() default true;
 }
